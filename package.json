@@ -1,5 +1,5 @@
 {
-    "name": "galaxy-plc",
+    "name": "keyence-plc",
     "version": "1.0.0",
     "description": "",
     "main": "plc.js",
@@ -8,11 +8,11 @@
     },
     "keywords": [
         "node-red",
-        "node-red-contrib-galaxy-plc"
+        "node-red-contrib-keyence-plc"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/Wu-haifen/npmdesc.git"
+        "url": "https://github.com/DilipTD/Keyence-PLC.git"
     },
     "node-red": {
         "nodes": {
