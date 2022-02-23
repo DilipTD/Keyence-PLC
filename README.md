@@ -1,4 +1,4 @@
-# 🏞 node-red-contrib-galaxy-plc
+# 🏞 node-red-contrib-keyence-plc
 
 Simple galaxy-plc node.
 
