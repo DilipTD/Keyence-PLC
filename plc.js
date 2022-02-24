@@ -20,7 +20,7 @@ module.exports = function(RED) {
     const msgQueueSize = RED.settings.tcpMsgQueueSize || 1000;
     const Denque = require('denque');
     var net = require('net');
-    //监控所有列表状态变量
+    //Monitor all list state variables
     var Monitoring_data = [];
     var flag_status = [];
     var send_ok_flag = false;
@@ -116,7 +116,7 @@ module.exports = function(RED) {
         return _maxKeptCount;
     }
     //-------------------------------------------------------------------------------------------------------//
-    //获取属性
+    //get attribute
     function getProperty(node, msg, done) {
         if (node.propertyType === 'jsonata') {
             RED.util.evaluateJSONataExpression(node.property, msg, (err, value) => {
@@ -195,7 +195,7 @@ module.exports = function(RED) {
             done(undefined, v2);
         }
     }
-    //使用单个规则
+    //Use a single rule
     function applyRule(node, msg, property, state, done) {
         //state.currentRule++
         var rule = node.rules[state.currentRule];
@@ -220,14 +220,14 @@ module.exports = function(RED) {
                     property = state.elseflag;
                     state.elseflag = true;
                 }
-                //每一行应用的条件规则，根据选择进行选取
+                //Conditional rules applied to each row, selected based on selection
                 for (var x = 0; x < msg.arr_length; x++) {
                     if (node.rules[state.currentRule].p == msg.payload[x].id) {
                         property = Number(msg.payload[x].val);
                     }
                 }
-                // console.log('调用次数' + state.currentRule);
-                // 应用一个或多个
+                // console.log('number of calls' + state.currentRule);
+                //Apply one or more
                 try {
                     if (operators[rule.t](property, v1, v2, rule.case, msg.parts)) {
 
@@ -239,7 +239,7 @@ module.exports = function(RED) {
                     } else {
                         state.onward.push(null);
                     }
-                    //输出自定义//当遍历所有条件后执行
+                    //  Output custom //  execute when all conditions are traversed
                     if (state.currentRule + 1 === node.rules.length) {
                         var num_onward = 0
                             // console.log(state.onward);
@@ -248,17 +248,17 @@ module.exports = function(RED) {
                                 num_onward++;
                             }
                         }
-                        //当满足条件大于1，则第一个不输出且定时器停止
+                        //When the condition is greater than 1, the first one is not output and the timer stops
                         if (num_onward > 1) {
                             state.onward[0] = null;
-                            //定时标志
+                            //timing mark
                             send_ok_flag = true;
                             for (var m = 0; m < Monitoring_data.length; m++) {
-                                //全局中查找起始地址
+                                //Find the starting address in the global
                                 if (Monitoring_data[m].address == node.addr_rd && Monitoring_data[m].server == node.server && Monitoring_data[m].port == node.port) {
                                     for (var n = 0; n < node.num_rd; n++) {
                                         if (Monitoring_data[m + n].status == 1) {
-                                            // 重置全局标志，将status置零    
+                                            // Reset global flags, zero status 
                                             Monitoring_data[m + n].status = 0;
                                             // console.log(Monitoring_data);
                                         }
@@ -277,7 +277,7 @@ module.exports = function(RED) {
             });
         });
     }
-    // 使用多个规则
+    // Use multiple rules
     function applyRules(node, msg, property, state, done) {
         if (!state) {
             if (node.rules.length === 0) {
@@ -297,10 +297,10 @@ module.exports = function(RED) {
             if (err) {
                 return done(err);
             }
-            // 多行
+            // Multi-line
             if (hasMore) {
                 state.currentRule++;
-                //回调
+                //callback
                 applyRules(node, msg, property, state, done);
             } else {
                 node.previousValue = property;
@@ -326,12 +326,12 @@ module.exports = function(RED) {
         this.num_wr = n.WR_Value;
 
 
-        //返回方式
-        //time 时间延时
-        //char 指定字符结尾
-        //count 指定接收长度
-        //sit 保持连接
-        //immed 不需要等待
+        //return method
+        //time-time delay
+        //char-end of specified character
+        //count-Specify receive length
+        //sit-stay connected
+        //immed-no need to wait
         if (this.out === "immed") {
             this.splitc = -1;
             this.out = "time";
@@ -544,32 +544,32 @@ module.exports = function(RED) {
                 node.error(RED._("switch.errors.too-many"), msg);
             }
         }
-        //处理数据
+        //Data processing
         function processMessage(msg, checkParts, done) {
             var hasParts = msg.hasOwnProperty("parts") &&
                 msg.parts.hasOwnProperty("id") &&
                 msg.parts.hasOwnProperty("index");
-            //需要统计字符个数
+            //Need to count the number of characters
             if (needsCount && checkParts && hasParts) {
                 addMessageToPending(msg, done);
-                //不需要统计字符个数
+                //No need to count the number of characters
             } else {
-                //获取属性msg
+                //get attribute msg
                 getProperty(node, msg, (err, property) => {
                     if (err) {
                         node.warn(err);
                         done();
                     } else {
-                        //应用规则//////////////////////////////////////////////////////
+                        //Apply rules//////////////////////////////////////////////////////
                         applyRules(node, msg, property, undefined, (err, onward) => {
                             if (err) {
                                 node.error(err, msg);
                             } else {
-                                //是否需要比较字符
+                                //need to compare characters
                                 if (!repair || !hasParts) {
                                     node.send(onward);
                                 } else {
-                                    //不用比较字符输出
+                                    //output without comparing characters
                                     sendGroupMessages(onward, msg);
 
                                 }
@@ -591,10 +591,10 @@ module.exports = function(RED) {
 
         var pendingMessages = [];
         var handlingMessage = false;
-        //处理消息队列
+        //process message queue
         var processMessageQueue = function(msg) {
             if (msg) {
-                //端口输出
+                //port output
                 // A new message has arrived - add it to the message queue
                 pendingMessages.push(msg);
                 if (handlingMessage) {
@@ -614,7 +614,7 @@ module.exports = function(RED) {
             // start processing it. Recurse back in to check for any more
             var nextMsg = pendingMessages.shift();
             handlingMessage = true;
-            // 回调函数
+            // Callback
             processMessage(nextMsg, true, err => {
                 if (err) {
                     node.error(err, nextMsg);
@@ -632,15 +632,15 @@ module.exports = function(RED) {
                 var sw_timer = this.interval_sw = setInterval(function() {
                     // node.emit("input", {});
                     var data_text = [];
-                    //查询
+                    //Inquire
                     for (var m = 0; m < Monitoring_data.length; m++) {
-                        //全局中查找起始地址
+                        //Find the starting address in the global
                         if (Monitoring_data[m].address == node.addr_rd && Monitoring_data[m].server == node.server && Monitoring_data[m].port == node.port) {
                             for (var n = 0; n < node.num_rd; n++) {
                                 var options = {};
                                 options.id = node.addr_rd + n;
                                 if (Monitoring_data[m + n].status == 1) {
-                                    // 重置全局标志，将status置零    
+                                    // Reset global flags, zero status   
                                     options.val = Monitoring_data[m + n].value;
                                 } else {
                                     options.val = Monitoring_data[m + n].value = -1;
@@ -649,7 +649,7 @@ module.exports = function(RED) {
                             }
                         }
                     }
-                    //在监控数据
+                    //monitoring data
                     msg.arr_length = data_text.length;
                     msg.payload = data_text;
                     // console.log(data_text);
@@ -669,11 +669,11 @@ module.exports = function(RED) {
 
             /////////////////////////////////////////////////////////////////////////////////////////tcp
             // var i = 0;
-            //将输入转成字符串
+            //convert input to string
             // if ((!Buffer.isBuffer(msg.payload)) && (typeof msg.payload !== "string")) {
             //     msg.payload = msg.payload.toString();
             // }
-            //读写模式
+            //read and write mode
             if (node.model == "write") {
                 // msg.payload = "WRS DM" + node.addr_wr + ".U" + " " + 1 + " " + node.num_wr + '\r\n';
                 msg.payload = "WRITE " + node.addr_wr + " " + 1 + " " + node.num_wr + '\r\n';
@@ -735,7 +735,7 @@ module.exports = function(RED) {
                     node.warn(RED._("tcpin.errors.no-host"));
                 }
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //定时触发//待处理
+                //Timed trigger//to be processed
 
                 ///////////////////////////////////////////////////////////
                 clients[connection_id].client.on('data', function(data) {
@@ -910,7 +910,7 @@ module.exports = function(RED) {
                 }
             }
             if (!anyConnected) { clients = {}; }
-            //清除定时器
+            //clear timer
             if (node.onceTimeout) {
                 clearTimeout(node.onceTimeout);
             }
@@ -940,7 +940,7 @@ module.exports = function(RED) {
         this.model = n.model;
         this.addr_rd = Number(n.RD_Addr);
         this.num_rd = Number(n.RD_Num);
-        //监控状态
+        //monitor status
         var Monitoring_status = [];
         var data_second = [];
         var Monitoring_flag = 1;
@@ -964,13 +964,13 @@ module.exports = function(RED) {
         var node = this;
 
         var clients = {};
-        //定时触发
+        //timing trigger
         if (node.interval_tcp_time) {
             this.interval_tcp = setInterval(function() {
                 node.emit("input", {});
             }, node.interval_tcp_time);
         }
-        //延时触发
+        //Delay trigger
         // this.onceTimeout=setTimeout(function() {
         //     // node.emit("input", {});
         //     // node.send("input");
@@ -1046,8 +1046,8 @@ module.exports = function(RED) {
                         if (clients[connection_id]) {
                             const msg = clients[connection_id].lastMsg || {};
                             data = data.toString().replace("\r\n", '').split(" ");
-                            //////////////////////////////////////////////////////////////////////////////////////输出处理
-                            // 第一步：记录status,翻转置1
+                            //////////////////////////////////////////////////////////////////////////////////////output processing
+                            // The first step: record the status, flip set to 1
                             for (var i = 0; i < data.length; i++) {
                                 if (data[i] === data_second[i]) {
                                     Monitoring_flag = 0;
@@ -1055,9 +1055,9 @@ module.exports = function(RED) {
                                     if (Monitoring_flag === 0) Monitoring_status[i] = 1;
                                 }
                             }
-                            // 保存历史值
+                            // save history
                             data_second = data;
-                            //第二步：读取数据存入表中
+                            //Step 2: Read the data and store it in the table
                             Monitoring_data = [];
                             var s = 0;
                             for (var key of data) {
@@ -1070,7 +1070,7 @@ module.exports = function(RED) {
                                 Monitoring_data.push(param);
                             }
                             node.addr_rd = n.RD_Addr;
-                            //首次次装入全局数据
+                            //Load global data for the first time
                             if (Monitoring_status.length == 0) {
                                 for (var i = 0; i < Monitoring_data.length; i++) {
                                     if (Monitoring_data[i].value) {
@@ -1242,7 +1242,7 @@ module.exports = function(RED) {
                 }
             }
             if (!anyConnected) { clients = {}; }
-            //清除定时器
+            //clear timer
             if (node.onceTimeout) {
                 clearTimeout(this.onceTimeout);
             }
